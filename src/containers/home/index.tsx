@@ -1,31 +1,46 @@
-import { Button, Card, Input, Text } from '@ui-kitten/components';
+import { Card, Text, Layout } from '@ui-kitten/components';
 import React, { Component, } from 'react';
 import { inject, observer } from 'mobx-react';
 
 import HomeStore from '../../stores/home.store';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, ScrollView } from 'react-native';
+
+import { ROUTES_NAMES } from '../../routes';
 
 interface Props {
-    homeStore: HomeStore
+    homeStore: HomeStore,
+    navigation: any
 }
 
 @inject('homeStore')
 @observer
 export default class Home extends Component<Props> {
 
-    render() {
-        const { etanol, gasolina, resultado, calculate, handleForm } = this.props.homeStore;
+    async componentDidMount(){
+        const {getFilms} = this.props.homeStore;
+        await getFilms();
+    }
 
-        return (<>
-            <Card>                
-                <Text>Informe o valor do litro do Etanol?</Text>
-                <Input value={etanol.toString()} onChangeText={(etanol) => handleForm({ etanol })} />    
-                <Text>Informe o valor do litro da Gasolina</Text>
-                <Input value={gasolina.toString()} onChangeText={(gasolina) => handleForm({ gasolina })} />
-                <Button onPress={() => calculate()}>Calcular</Button>
-                <Text style={styles.paragraph} >{resultado}</Text>
-            </Card>
-        </>);
+    render() {
+        const { films } = this.props.homeStore;
+
+        const navigateScreen = (id: number) => {
+            const { navigate } = this.props.navigation;
+            navigate(ROUTES_NAMES.Film, { id });
+        }
+
+        return (<Layout style={{flex:1, backgroundColor: 'black'}}>
+            <ScrollView>
+                {films.map((film, index)=> (
+                    <Card onPress={() => navigateScreen(film.id)} key={index}>
+                        <Text style={styles.title}>{film.title}</Text>
+                        <Text>Episode {film.episode_id.toString()}</Text>
+                    </Card>
+                ))}
+
+            </ScrollView>
+
+        </Layout>);
     }
 }
 
@@ -40,6 +55,6 @@ const styles = StyleSheet.create({
         margin: 24,
         fontSize: 17,
         fontWeight: 'bold',
-        textAlign: 'center'        
-    }    
+        textAlign: 'center'
+    }
 });
